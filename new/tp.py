@@ -65,16 +65,6 @@ def SimilarityScore(mat):
 				scoreCoords = (row, col)
 	return scoreCoords
 
-def Significance(V,U,s,n,cost):
-	a = U.count("A")
-	g = U.count("G")
-	t = U.count("T")
-	c = U.count("C")
-	for i in range(n):
-		s = a * "A" + g * "G" + c * "C" + t * "T"
-		rnd = list(s)
-		random.shuffle(rnd)
-		seq = ''.join(rnd)
 
 def FindAlignment(mat, scoreCoords, U, V, cost):
 	idxRow = scoreCoords[0]
@@ -99,6 +89,7 @@ def FindAlignment(mat, scoreCoords, U, V, cost):
 
 	while mat[idxRow][idxCol] != 0:
 		last = (idxRow, idxCol)
+
 		# trouver quelle case est utilisée pour calculer la case courante
 		if mat[idxRow-1][idxCol-1] + cost(V[idxRow-1], U[idxCol-1]) == mat[idxRow][idxCol]:
 			# case gauche-haut
@@ -116,7 +107,6 @@ def FindAlignment(mat, scoreCoords, U, V, cost):
 			alignedV += "-"
 			alignedU += U[idxCol-1]
 			idxCol -= 1
-		
 
 	# retourne tuple car plus optimisé que liste
 	return ((alignedU[::-1], alignedV[::-1]), last)
@@ -145,12 +135,7 @@ def Align(fi, cost):
 
 	(alignedU, alignedV), startCoords = FindAlignment(mat, endCoords, U, V, cost)
 
-	a = len(re.findall("[ACGT]", alignedU)) - 1 
-	b = len(re.findall("[ACGT]", alignedV)) - 1 
-	print(a)
-	print(b)
-
-	print(f"{labelU}\t{startCoords[0]}  {alignedU}  {endCoords[0]}")
+	print(f"{labelU}\t{startCoords[1]}  {alignedU}  {endCoords[1]}")
 	display = " " * len(labelU) + "\t   " 
 	for i in range(len(alignedU)):
 		if alignedU[i] == alignedV[i]:
@@ -158,9 +143,20 @@ def Align(fi, cost):
 		else:
 			display += " "
 	print(display)
-	print(f"{labelV}\t{startCoords[1]}  {alignedV}  {endCoords[1]}")
+	print(f"{labelV}\t{startCoords[0]}  {alignedV}  {endCoords[0]}")
 
 
+
+def Significance(V,U,s,n,cost):
+	a = U.count("A")
+	g = U.count("G")
+	t = U.count("T")
+	c = U.count("C")
+	for i in range(n):
+		s = a * "A" + g * "G" + c * "C" + t * "T"
+		rnd = list(s)
+		random.shuffle(rnd)
+		seq = ''.join(rnd)
 
 scores = {"identity": 2, "substitution": -1, "indel": -2}
 cost = Cost(scores, "ATCG")

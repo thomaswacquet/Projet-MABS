@@ -56,6 +56,10 @@ def DPmatrix(U, V, cost):
 
 
 def SimilarityScore(mat):
+	row, col = SimilarityScoreCoords(mat)
+	return mat[row][col]
+
+def SimilarityScoreCoords(mat):
 	max = 0
 	scoreCoords = (0, 0)
 	for row in range(len(mat)):
@@ -122,7 +126,7 @@ def Align(fi, cost):
 
 
 	mat = DPmatrix(U, V, cost)
-	endCoords = SimilarityScore(mat)
+	endCoords = SimilarityScoreCoords(mat)
 	score  = mat[endCoords[0]][endCoords[1]]
 
 
@@ -147,16 +151,32 @@ def Align(fi, cost):
 
 
 
-def Significance(V,U,s,n,cost):
+def Significance(V, U, s, n, cost):
 	a = U.count("A")
 	g = U.count("G")
 	t = U.count("T")
 	c = U.count("C")
+	scores = []
+	count = 0
 	for i in range(n):
-		s = a * "A" + g * "G" + c * "C" + t * "T"
-		rnd = list(s)
+		rnd = list(a * "A" + g * "G" + c * "C" + t * "T")
 		random.shuffle(rnd)
 		seq = ''.join(rnd)
+
+		mat = DPmatrix(seq, V, cost)
+		score = SimilarityScore(mat)
+		scores.append(score)
+#		if score >= s:
+#			count += 1
+	return scores
+
+def DisplayDist(V, U, s, n, cost):
+	scores = Significance(V, U, s, n, cost)
+	print(scores)
+	for i in range(len(scores)):
+		print(str(i) + ": " + "=" * scores.count(i))
+
+
 
 scores = {"identity": 2, "substitution": -1, "indel": -2}
 cost = Cost(scores, "ATCG")
@@ -164,10 +184,11 @@ cost = Cost(scores, "ATCG")
 #V = "CTCATT"
 U = "TGTTACGG"
 V = "GGTTGACTA"
-mat = DPmatrix(U, V, cost)
-scoreCoords = SimilarityScore(mat)
+#mat = DPmatrix(U, V, cost)
+#scoreCoords = SimilarityScore(mat)
 #FindAlignment(mat, scoreCoords, U, V, cost)
-Align("sequences.fa", cost)
+#Align("sequences.fa", cost)
 #print(max)
 
-#Significance("A", "AGC", "A", 5, "A")
+DisplayDist("A", "AGC", 2, 5, cost)
+#print(r)

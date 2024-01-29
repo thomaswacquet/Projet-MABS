@@ -13,7 +13,7 @@ def ParseFasta(Fi):
 	for l in f:
 		l = l.rstrip()
 		if l[0] == ">":
-			currentSeq = l[1]
+			currentSeq = l[1:]
 			res[currentSeq] = ""
 		else:
 			if currentSeq == "":
@@ -82,56 +82,96 @@ def FindAlignment(mat, scoreCoords, U, V, cost):
 	alignedU = ""
 	alignedV = ""
 
-	
-	alignedU = U[idxCol-1]
-	alignedV = V[idxRow-1]
+	# afficher matrice
+	# a = "    " + " ".join(list(U))
+	# print(a)
+	# for row in range(len(mat)):
+	# 	if row != 0:
+	# 		print(V[row-1] + " ", end="")
+	# 	else:
+	# 		print("  ", end="")
+	# 	for col in range(len(mat[0])):
+	# 		print(str(mat[row][col]) + " ", end="")
+	# 	print()
+	# print("  ")
 
-	idxCol -= 1
-	idxRow -= 1
+	last = scoreCoords
 
-	while idxRow > 0 and idxCol > 0:
-		idxU = idxCol + 1
-		idxV = idxRow + 1
-
-		#if (mat[idxRow-1][idxCol]):
-
-
-		return
-		maxVal = max(
-			mat[idxRow-1][idxCol],
-			mat[idxRow][idxCol-1],
-			mat[idxRow-1][idxCol-1]
-		)
-		#print(mat[idxRow][idxCol])
-		print(maxVal)
-
-		if (maxVal == mat[idxRow-1][idxCol]):
+	while mat[idxRow][idxCol] != 0:
+		last = (idxRow, idxCol)
+		# trouver quelle case est utilisée pour calculer la case courante
+		if mat[idxRow-1][idxCol-1] + cost(V[idxRow-1], U[idxCol-1]) == mat[idxRow][idxCol]:
+			# case gauche-haut
+			alignedU += U[idxCol-1]
+			alignedV += V[idxRow-1]
+			idxRow -= 1
+			idxCol -= 1
+		elif mat[idxRow-1][idxCol] + cost(V[idxRow-1], "") == mat[idxRow][idxCol]:
+			# case haut
 			alignedU += "-"
 			alignedV += V[idxRow-1]
-		elif (maxVal == mat[idxRow][idxCol-1]):
-			alignedU += U[idxCol-1]
-			alignedV += "-"
+			idxRow -= 1
 		else:
+			# case gauche
+			alignedV += "-"
 			alignedU += U[idxCol-1]
-			alignedV += V[idxRow-1]
+			idxCol -= 1
+		
 
-		idxCol -= 1
-		idxRow -= 1
+	# retourne tuple car plus optimisé que liste
+	return ((alignedU[::-1], alignedV[::-1]), last)
 
-	print(alignedU)
-	print(alignedV)
+def Align(fi, cost):
+	sequences = ParseFasta(fi)
+	seqVals = list(sequences.values())
+	U = seqVals[0]
+	V = seqVals[1]
+	seqLabels = list(sequences.keys())
+	labelU = seqLabels[0]
+	labelV = seqLabels[1]
 
-	print("    " + " ".join(list(U)))
-	print(mat)
+
+	mat = DPmatrix(U, V, cost)
+	endCoords = SimilarityScore(mat)
+	score  = mat[endCoords[0]][endCoords[1]]
+
+
+	print(">" + labelU)
+	print(U)
+	print(">" + labelV)
+	print(V + "\n")
+	print("Alignment score: " + str(score) + "\n")
+	print("Alignment:\n")
+
+	(alignedU, alignedV), startCoords = FindAlignment(mat, endCoords, U, V, cost)
+
+	a = len(re.findall("[ACGT]", alignedU)) - 1 
+	b = len(re.findall("[ACGT]", alignedV)) - 1 
+	print(a)
+	print(b)
+
+	print(f"{labelU}\t{startCoords[0]}  {alignedU}  {endCoords[0]}")
+	display = " " * len(labelU) + "\t   " 
+	for i in range(len(alignedU)):
+		if alignedU[i] == alignedV[i]:
+			display += "|"
+		else:
+			display += " "
+	print(display)
+	print(f"{labelV}\t{startCoords[1]}  {alignedV}  {endCoords[1]}")
+
 
 
 scores = {"identity": 2, "substitution": -1, "indel": -2}
 cost = Cost(scores, "ATCG")
+#U = "AGTTTTCAG"
+#V = "CTCATT"
 U = "TGTTACGG"
 V = "GGTTGACTA"
 mat = DPmatrix(U, V, cost)
 scoreCoords = SimilarityScore(mat)
-FindAlignment(mat, scoreCoords, U, V, cost)
+#FindAlignment(mat, scoreCoords, U, V, cost)
+Align("sequences.fa", cost)
 #print(max)
 
 #Significance("A", "AGC", "A", 5, "A")

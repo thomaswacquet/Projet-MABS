@@ -1,16 +1,17 @@
 from calendar import c
-import sys
-from IOAlignment import IOAlignment
+import sys #à retirer ?
+from IOAlignment import IOAlignment # modifier le parser de score pour qu'il prenne l'alphabet
 
 from Aligner import Alignment
 from typing import Type
 from Cost import Cost
 import numpy as np
 import random
-import time
+import time #à retirer ?
 from Aligner import Aligner
+import argparse
 
-# 15 min de présentation
+# 20 min d'oral => 10 min de présentations + 10 min de questions
 
 
 # afficher matrice
@@ -26,11 +27,52 @@ from Aligner import Aligner
 # 	print()
 # print("  ")
 
+def parse():
+    """
+    Fonction pour créer un 'parser' pour les options sur le terminal
+    """
+    parser = argparse.ArgumentParser(description="Parse arguments of #nom du fichier#")
+    parser.add_argument('-f', dest='file', type = str,  required=True,
+                        help="fichier à parser contenant les séquences")
+    parser.add_argument('-s', dest='seuil', required=False, type = int,
+                        help="seuil minimal pour le score d'alignement | par défaut s = 5", default=5) 
+    parser.add_argument('-n', dest='nb_seq', required=False, type = int,
+                        help="nombre de séquences aléatoires à construire | par défaut n = 15",  default=15) 
+    parser.add_argument('-c_abc', dest='cost_alphabet', required=True, type =str,
+                        help="alphabet des séquences") # à mettre dans le fichier des scores 
+    parser.add_argument('-c_scr', dest='cost_scores', required=True, type = str,
+                        help="fichier contenant les scores")
+    parser.add_argument('-l', dest='length', required=False,type=int, 
+                        help='nombre de bases à afficher par ligne | par défaut l = 10',  default=10) 
+    return parser.parse_args()
 
 
 def DisplayAlign(fi, s, n, cost, l):
-	# parse le fichier fasta et trouve les séquences U et V et leurs label
-	sequences = IOAlignment.ParseFasta(fi)
+	"""Affichage des séquences, score de l'alignement et alignement des 
+	séquences données dans le fichier fasta en entrée
+	
+    Parameters:
+    --------
+    fi : File                         
+        fichier fasta à parser      
+    s : Int
+        seuil minimal pour le score d'alignement
+    n : Int
+        nombre de séquences aléatoires à construire
+	cost : Cost
+        objet de la classe Cost contenant les scores et l'alphabet
+    l : Int
+        nombre de bases à afficher par ligne
+
+		
+	Returns
+    -------
+    score : Int
+        score de l'alignement
+	"""
+	# ParseFasta parse les séquences en dictionnaire 
+	# sous la forme {label : séquence}
+	sequences = fi
 	seqVals = list(sequences.values())
 	U = seqVals[0]
 	V = seqVals[1]
@@ -38,13 +80,13 @@ def DisplayAlign(fi, s, n, cost, l):
 	labelU = seqLabels[0]
 	labelV = seqLabels[1]
 
-	# calcule la matrice et le score
+	# Calcule de la matrice et du score
 	aligner = Aligner(U, V, cost)
 	alignment = aligner.FindAlignment()
 
 	score  = alignment.Score()
 
-	# affiche le résultat
+	# Affichage du résultat
 	print(">" + labelU)
 	print(U)
 	print(">" + labelV)
@@ -55,7 +97,7 @@ def DisplayAlign(fi, s, n, cost, l):
 	nbChars = max(len(str(alignment.startCoords[0])), len(str(alignment.startCoords[1])))
 
 	for i in range(0, len(alignment.alignedU), l):
-		# détermine les positions de départ et de fin
+		# Détermine les positions de départ et de fin
 		Ustart = i + alignment.startCoords[1]
 		Vstart = i + alignment.startCoords[0]
 		Uend = Ustart + min(i + l, alignment.endCoords[1])
@@ -74,10 +116,29 @@ def DisplayAlign(fi, s, n, cost, l):
 		print(f"{labelV}   {str(Vstart).rjust(nbChars)}  {Vpart}  {Vend}")
 		print()
 
+
 	DisplayDist(U, V, s, n, cost, score)
 	return score
 
 def Significance(U, V, n, cost):
+	"""Création de n séquences aléatoires et retourne les scores d'alignement
+	
+	Parameters:
+    --------
+    U : File                         
+        séquence U
+    V : Int
+        séquence V
+    n : Int
+        nombre de séquences aléatoires à construire
+	cost : Cost
+        objet de la classe Cost contenant les scores et l'alphabet
+		
+	Returns
+    -------
+    scores : List
+        scores des alignements
+	"""
 	a = U.count("A")
 	g = U.count("G")
 	t = U.count("T")
@@ -96,6 +157,21 @@ def Significance(U, V, n, cost):
 	return scores
 
 def DisplayDist(U, V, s, n, cost, alignmentScore):
+	"""Affichage de la distribution des scores calculée par Significance
+	
+	Parameters:
+    --------
+    U : File                         
+        séquence U
+    V : Int
+        séquence V
+    n : Int
+        nombre de séquences aléatoires à construire
+	cost : Cost
+        objet de la classe Cost contenant les scores et l'alphabet
+	alignmentScore : Int
+        score de l'alignement
+	"""
 	scores = Significance(U, V, n, cost)
 
 	count = 0
@@ -107,13 +183,13 @@ def DisplayDist(U, V, s, n, cost, alignmentScore):
 	print(" score       #")
 	lenScore = len("score")+1
 	for i in range(max(scores)+1):
-		# ajoute des espaces à gauche de tel sorte que les scores soient alignés sur "score"
+		# Espacer les scores afin qu'ils soient alignés sur "score"
 		count = scores.count(i)
 		equals = int(count/n*100) * "="
 
 		offset = 0
 
-		# si le score courant est égal au score d'alignement, mettre un *
+		# Si le score courant est égal au score d'alignement, ajouter une *
 		if i == alignmentScore:
 			print("*", end="")
 			offset = -1
@@ -170,14 +246,28 @@ def DisplayDist(U, V, s, n, cost, alignmentScore):
 # 		print(f"{str(i).rjust(lenScore + offset)}     {str(count).rjust(3)}: {equals}")
 
 
+if __name__ == "__main__": 
+    OPTIONS = parse()
+    file = IOAlignment(OPTIONS.file)
+    file = file.ParseFasta()
+    alphabet = OPTIONS.cost_alphabet
+    scores = IOAlignment(OPTIONS.cost_scores)
+    scores = scores.ParseConfig()
+    #string_to_break = OPTIONS.cost_scores
+    #scores = string_to_break.split()
+    # ide = int(scores[0])
+    # sbt = int(scores[1])
+    # ind = int(scores[2])
+    # scores =  {"identity": ide, "substitution": sbt, "indel": ind}
+    #scores = {"identity": 2, "substitution": -1, "indel": -2}
+    # cost = Cost(scores, "ATCG")
+    #U = "TGTTACGG"
+    #V = "GGTTGACTA"
+    # l = 10
 
-scores = {"identity": 2, "substitution": -1, "indel": -2}
-cost = Cost(scores, "ATCG")
-U = "TGTTACGG"
-V = "GGTTGACTA"
-l = 10
+    score = DisplayAlign(file, OPTIONS.seuil,  OPTIONS.nb_seq, Cost(scores, alphabet), OPTIONS.length)
+    #score = DisplayAlign("sequences_2.fa", 5, 30, cost, l)
 
-score = DisplayAlign("sequences_2.fa", 5, 30, cost, l)
 
 # for n in [5000, 10000, 100000]:
 # 	time1_start = time.time()

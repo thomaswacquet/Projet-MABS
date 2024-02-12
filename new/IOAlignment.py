@@ -1,8 +1,12 @@
 import re
 
 class IOAlignment:
-    def ParseFasta(Fi):
-        f = open(Fi, "r")
+    """Classe pour le parsing de fichier fasta et de configuration"""
+    def __init__(self, Fi):
+        self.__fi = Fi
+
+    def ParseFasta(self):
+        f = open(self.__fi, "r")
         currentSeq = ""
         res = dict()
 
@@ -23,8 +27,8 @@ class IOAlignment:
 
         return res
 
-    def ParseConfig(Fi):
-        f = open(Fi, "r")
+    def ParseConfig(self):
+        f = open(self.__fi, "r")
         res = dict()
 
         for l in f:

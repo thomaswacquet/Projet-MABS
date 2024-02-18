@@ -83,7 +83,6 @@ class Aligner:
         # print(alignedV[::-1])
         alignment = Alignment(alignedU[::-1], alignedV[::-1], startCoords, endCoords, mat)
         return alignment
-#        return ((alignedU[::-1], alignedV[::-1]), startCoords)
     
     def DPmatrix_v2(self):
         score = 0

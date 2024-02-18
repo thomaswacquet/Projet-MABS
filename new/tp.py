@@ -13,19 +13,19 @@ import argparse
 
 # 20 min d'oral => 10 min de présentations + 10 min de questions
 
-
-# afficher matrice
-# a = "    " + " ".join(list(U))
-# print(a)
-# for row in range(len(mat)):
-# 	if row != 0:
-# 		print(V[row-1] + " ", end="")
-# 	else:
-# 		print("  ", end="")
-# 	for col in range(len(mat[0])):
-# 		print(str(mat[row][col]) + " ", end="")
-# 	print()
-# print("  ")
+def DisplayMatrice(mat, U, V):
+	# afficher matrice
+	a = "    " + " ".join(list(U))
+	print(a)
+	for row in range(len(mat)):
+		if row != 0:
+			print(V[row-1] + " ", end="")
+		else:
+			print("  ", end="")
+		for col in range(len(mat[0])):
+			print(str(mat[row][col]) + " ", end="")
+		print()
+	print("  ")
 
 def parse():
     """
@@ -72,7 +72,7 @@ def DisplayAlign(fi, s, n, cost, l):
 	"""
 	# ParseFasta parse les séquences en dictionnaire 
 	# sous la forme {label : séquence}
-	sequences = fi
+	sequences = IOAlignment(fi).ParseFasta()
 	seqVals = list(sequences.values())
 	U = seqVals[0]
 	V = seqVals[1]
@@ -83,6 +83,7 @@ def DisplayAlign(fi, s, n, cost, l):
 	# Calcule de la matrice et du score
 	aligner = Aligner(U, V, cost)
 	alignment = aligner.FindAlignment()
+	DisplayMatrice(alignment.mat, U, V)
 
 	score  = alignment.Score()
 
@@ -248,8 +249,6 @@ def DisplayDist(U, V, s, n, cost, alignmentScore):
 
 if __name__ == "__main__": 
     OPTIONS = parse()
-    file = IOAlignment(OPTIONS.file)
-    file = file.ParseFasta()
     alphabet = OPTIONS.cost_alphabet
     scores = IOAlignment(OPTIONS.cost_scores)
     scores = scores.ParseConfig()
@@ -265,7 +264,7 @@ if __name__ == "__main__":
     #V = "GGTTGACTA"
     # l = 10
 
-    score = DisplayAlign(file, OPTIONS.seuil,  OPTIONS.nb_seq, Cost(scores, alphabet), OPTIONS.length)
+    score = DisplayAlign(OPTIONS.file, OPTIONS.seuil,  OPTIONS.nb_seq, Cost(scores, alphabet), OPTIONS.length)
     #score = DisplayAlign("sequences_2.fa", 5, 30, cost, l)
 
 

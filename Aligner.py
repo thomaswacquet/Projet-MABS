@@ -1,24 +1,24 @@
 import numpy as np 
-
-class Alignment:
-    def __init__(self, alignedU, alignedV, startCoords, endCoords, mat):
-        self.startCoords = startCoords
-        self.endCoords = endCoords
-        self.mat = mat
-        self.alignedU = alignedU
-        self.alignedV = alignedV
-
-    def Score(self):
-        return self.mat[self.endCoords[0]][self.endCoords[1]]
-
+from Alignment import Alignment
 
 class Aligner:
+    """
+    Classe contenant les méthodes de calcul de l'alignment
+    """
     def __init__(self, U, V, cost):
         self.__U = U
         self.__V = V
         self.__cost = cost
 
     def DPmatrix(self):
+        """
+        Calcule la matrice d'alignement pour U et V
+
+        Returns
+        -------
+        res : np.array
+            matrice d'alignement
+        """
         res = np.zeros((len(self.__V)+1, len(self.__U)+1), dtype=np.int8)
 
         for idxV in range(len(self.__V)):
@@ -32,6 +32,9 @@ class Aligner:
         return res
 
     def SimilarityScore(self):
+        """
+        Retourne le score à partir de la matrice
+        """
         mat = self.DPmatrix()
         row, col = self.SimilarityScoreCoords(mat)
         return mat[row][col]
@@ -46,8 +49,7 @@ class Aligner:
                     scoreCoords = (row, col)
         return scoreCoords
     
-    def FindAlignment(self):
-        mat = self.DPmatrix()
+    def __Traceback(self, mat):
         endCoords = self.__SimilarityScoreCoords(mat)
 
         idxRow = endCoords[0]
@@ -79,12 +81,28 @@ class Aligner:
                 alignedU += self.__U[idxCol-1]
                 idxCol -= 1
 
-        # print(alignedU[::-1])
-        # print(alignedV[::-1])
-        alignment = Alignment(alignedU[::-1], alignedV[::-1], startCoords, endCoords, mat)
-        return alignment
+        return Alignment(alignedU[::-1], alignedV[::-1], startCoords, endCoords, mat)
+
+    def FindAlignment(self):
+        """
+        Retourne l'alignement entre U et V en calculant la matrice puis en calculant le traceback
+
+        Returns
+        -------
+        alignment : Alignment
+        """
+        mat = self.DPmatrix()
+        return self.__Traceback(mat)
     
     def DPmatrix_v2(self):
+        """
+        Calcule le score pour U et V en calculant les valeurs de la matrice en stockant 2 lignes successives de la matrice
+
+        Returns
+        -------
+        score : int
+            score d'alignement
+        """
         score = 0
         ligne1 = np.zeros(len(self.__U)+1, dtype=np.int8)
         ligne2 = np.zeros(len(self.__U)+1, dtype=np.int8)
@@ -106,5 +124,11 @@ class Aligner:
         return score
     
     def Score(self):
-        return self.FindAlignment().Score()
-    
+        """
+        Calcule le score
+
+        Returns
+        -------
+        score : int
+        """
+        return self.DPmatrix_v2()

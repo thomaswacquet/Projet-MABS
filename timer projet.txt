@@ -1,0 +1,20 @@
+# for n in [5000, 10000, 100000]:
+# 	time1_start = time.time()
+# 	DisplayDist(U, V, 7, n, cost, score)
+# 	time1_end = time.time()
+
+# 	duration1 = time1_end - time1_start
+
+# 	time2_start = time.time()
+# 	DisplayDist_v2(U, V, 7, n, cost, score)
+# 	time2_end = time.time()
+
+# 	duration2 = time2_end - time2_start
+# 	string += f"{n} {duration1} {duration2}\n"
+# print(string)
+
+#print(DPmatrix_v2(U, V, cost))
+#print("---------------")
+#print(DPmatrix(U, V, cost))
+#print(max)
+#print(r)

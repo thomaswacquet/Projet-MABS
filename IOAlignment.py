@@ -23,7 +23,7 @@ class IOAlignment:
             l = l.rstrip()
 
             if l[0] == ">":
-                # si la ligne commence par >, stocke le label
+                # si la ligne commence par '>', stocker le label
                 currentSeq = l[1:]
                 res[currentSeq] = ""
             else:

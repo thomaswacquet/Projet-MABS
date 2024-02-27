@@ -65,18 +65,18 @@ class Aligner:
 
             # trouver quelle case est utilisée pour calculer la case courante
             if mat[idxRow-1][idxCol-1] + self.__cost(self.__V[idxRow-1], self.__U[idxCol-1]) == mat[idxRow][idxCol]:
-                # case gauche-haut
+                # en cas de match/mismatch
                 alignedU += self.__U[idxCol-1]
                 alignedV += self.__V[idxRow-1]
                 idxRow -= 1
                 idxCol -= 1
             elif mat[idxRow-1][idxCol] + self.__cost(self.__V[idxRow-1], "") == mat[idxRow][idxCol]:
-                # case haut
+                # en cas d'insertion
                 alignedU += "-"
                 alignedV += self.__V[idxRow-1]
                 idxRow -= 1
             else:
-                # case gauche
+                # en cas de délétion
                 alignedV += "-"
                 alignedU += self.__U[idxCol-1]
                 idxCol -= 1

@@ -1,5 +1,6 @@
 class Alignment:
-    """Classe qui contient un alignement (valeurs de U et de V alignés avec leurs coordonnés ainsi que la matrice d'alignement)"""
+    """Classe contenant un alignement (valeurs de U et de V alignées avec leurs coordonnées 
+        ainsi que la matrice d'alignement)"""
     def __init__(self, alignedU, alignedV, startCoords, endCoords, mat):
         self.startCoords = startCoords
         self.endCoords = endCoords
@@ -8,4 +9,5 @@ class Alignment:
         self.alignedV = alignedV
 
     def Score(self):
+        """Retourne le score de l'alignement entre U et V"""
         return self.mat[self.endCoords[0]][self.endCoords[1]]

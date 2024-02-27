@@ -158,7 +158,6 @@ def Significance(U, V, n, cost):
 		seq = ''.join(rnd)
 		aligner = Aligner(seq, V, cost)
 
-		#score = aligner.Score()
 		score = aligner.Score()
 		scores.append(score)
 	return scores
@@ -208,6 +207,8 @@ if __name__ == "__main__":
 	if OPTIONS.config_file != None:
 		config = IOAlignment(OPTIONS.config_file).ParseConfig()
 	else:
+		# Création de valeur par défaut pour la configuration
+		# si l'utilisateur n'en choisit pas
 		config = dict()
 		config["combs"] = {}
 		config["substitution"] = -1
@@ -219,4 +220,4 @@ if __name__ == "__main__":
 	score = DisplayAlign(OPTIONS.file, OPTIONS.seuil,  OPTIONS.nb_seq, CostIUPAC(config, config["alphabet"], config["combs"]), OPTIONS.length, OPTIONS.display_matrix)
 	# time1_end = time.time()
 
-	# print(f"{time1_end - time1_start}")
+	# print(f"Temps d'exécution : {time1_end - time1_start}")
